@@ -1,0 +1,45 @@
+{
+  "description": "Break current tab URLs into navigable breadcrumbs",
+  "icons": {
+	"16": "resources/icon-16.png",
+	"32": "resources/icon-32.png",
+	"64": "resources/icon-64.png"
+  },
+  "homepage_url": "https://github.com/jokokko/breadcrumbus",
+  "manifest_version": 2,
+  "name": "breadcrumbus",
+  "default_locale": "en",
+  "options_ui": {
+    "page": "options.html",
+    "browser_style": false
+  },
+  "background": {
+    "scripts": [
+    ]
+  },
+  "permissions": [
+    "tabs",
+    "storage"
+  ],
+	"browser_action": {
+		"default_icon": {
+			"16": "resources/icon-16.png",
+			"32": "resources/icon-32.png"
+		},
+		"default_title": "Breadcrumbus",
+		"default_popup": "tabpanel.html"
+	},
+  "commands": {
+    "_execute_browser_action": {
+      "suggested_key": {
+        "default": "Ctrl+Comma"
+      }
+    }
+  },
+  "version": "1.0.0",
+  "applications": {
+    "gecko": {
+      "id": "@breadcrumbus"
+    }
+  }
+}
