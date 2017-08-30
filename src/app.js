@@ -29,6 +29,10 @@
         return {
             get: async () => {
 
+                if (typeof(browser) === 'undefined') {
+                    return settings;
+                }
+
                 return browser.storage.sync.get(settings);
             }
         }
