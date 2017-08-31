@@ -3,10 +3,23 @@
 (function () {
     let app = angular.module("crumbapp", []);
 
+    app.directive("ngClickonenter", [ClickOnEnter]);
+    app.factory("port", [PortFactory]);
     app.service("navigateService", [NavigateService]);
     app.service("settingsService", [SettingsService]);
-    app.controller("crumbctrl", ["$scope", "navigateService", "settingsService", CrumbCtrl]);
+    app.controller("crumbctrl", ["$scope", "navigateService", "settingsService", "port", CrumbCtrl]);
     app.filter("shouldHideCrumb", [FilterFactory]);
+
+    function ClickOnEnter() {
+
+        return (scope, element) => {
+            element.bind("keydown", function (event) {
+                if (event.keyCode === 13) {
+                    element.triggerHandler('click');
+                }
+            });
+        };
+    }
 
     function FilterFactory() {
 
@@ -18,6 +31,20 @@
                 return item.display && item.display.length > 0 && !hide.includes(item.display);
             });
         };
+    }
+
+    function PortFactory() {
+        if (typeof(browser) !== 'undefined') {
+            return browser.runtime.connect({name: contracts.Port});
+        }
+        return {
+            postMessage: () => {
+            },
+            onMessage: {
+                addListener: () => {
+                }
+            }
+        }
     }
 
     function SettingsService() {
@@ -42,22 +69,9 @@
         return {
             currentTab: async () => {
                 if (typeof(browser) === 'undefined') {
-                    return [{ url: "http://localhost.local/path/more?query=value&more=stuff#hash", id: 0 }];
+                    return [{url: "http://localhost.local/path/more?query=value&more=stuff#hash", id: 0}];
                 }
                 return browser.tabs.query({currentWindow: true, active: true});
-            },
-            navigate: (id, uri) => {
-                if (typeof(browser) === 'undefined') {
-                    return Promise.resolve(true);
-                }
-                return browser.tabs.update(id,{
-                    active: true,
-                    url: uri
-                }).then(() => {
-                    return true;
-                }).catch(() => {
-                    return false;
-                });
             }
         }
     }
@@ -70,39 +84,50 @@
         }
     }
 
-    function CrumbCtrl($scope, navigateService, settingsService) {
+    function CrumbCtrl($scope, navigateService, settingsService, port) {
 
         let ctx = this;
+        let handlers = {};
 
         ctx.$scope = $scope;
         ctx.settings = null;
         ctx.navigateService = navigateService;
         ctx.settingsService = settingsService;
+        ctx.port = port;
         ctx.partCollections = [];
         ctx.navigate = ctx.navigate.bind(this);
+
+        handlers[contracts.OpenURLCompleted] = () => {
+            window.close();
+        };
+
+        port.onMessage.addListener(e => {
+            let handler = handlers[e.event];
+            if (handler) {
+                handler(e, port);
+            }
+        });
 
         ctx.$onInit = async function () {
             let currentTab = await ctx.navigateService.currentTab();
 
-            if (!currentTab)
-            {
+            if (!currentTab) {
                 return;
             }
 
             ctx.settings = await ctx.settingsService.get();
 
-            ctx.partCollections = currentTab.map(currentTab =>
-            {
+            ctx.partCollections = currentTab.map(currentTab => {
                 let uri = new URL(currentTab.url);
                 let host = new UriPart(contracts.UriPartHost, uri.origin, uri.hostname);
                 let path = uri.pathname.split(/(?=\/)/g);
 
                 let pathParts = path.map((item) => {
-                   return new UriPart(contracts.UriParthPath, item);
+                    return new UriPart(contracts.UriParthPath, item);
                 });
 
                 let searchParts = uri.search.split(/(?=&)/g).map((item) => {
-                   return new UriPart(contracts.UriPartSearch, item);
+                    return new UriPart(contracts.UriPartSearch, item);
                 });
 
                 let hash = new UriPart(contracts.UriPartHash, uri.hash);
@@ -118,20 +143,15 @@
         };
     }
 
-    CrumbCtrl.prototype.navigate = async function (collection, part) {
+    CrumbCtrl.prototype.navigate = function (collection, part) {
         let ctx = this;
 
         let index = collection.uriParts.indexOf(part);
-        let items = collection.uriParts.slice(0, index+1);
+        let items = collection.uriParts.slice(0, index + 1);
         let target = items.reduce((uri, current) => {
             return uri + current.part;
         }, "");
 
-        let navigated = await ctx.navigateService.navigate(collection.id, target);
-
-        if (navigated)
-        {
-            window.close();
-        }
+        ctx.port.postMessage({command: contracts.OpenURL, payload: {tabId: collection.id, uri: target}});
     };
 })(window);
