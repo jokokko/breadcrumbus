@@ -16,7 +16,9 @@
   "background": {
     "scripts": [
       "contracts.js",
-      "background.js"
+      "settings.js",
+      "background.js",
+      "pageaction.js"
     ]
   },
   "permissions": [
@@ -31,6 +33,13 @@
 		"default_title": "Breadcrumbus",
 		"default_popup": "tabpanel.html"
 	},
+  "page_action": {
+    "default_icon": {      
+      "32": "resources/icon-32-bw.png"
+    },
+    "default_title": "Breadcrumbus",
+    "default_popup": "tabpanel.html"
+  },
   "commands": {
     "_execute_browser_action": {
       "suggested_key": {
@@ -38,7 +47,7 @@
       }
     }
   },
-  "version": "1.0.2",
+  "version": "1.0.3",
   "applications": {
     "gecko": {
       "id": "@breadcrumbus"

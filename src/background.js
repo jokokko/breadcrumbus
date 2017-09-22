@@ -9,10 +9,20 @@ let root = {};
 
         let payload = request.payload;
 
-        let updated = await browser.tabs.update(payload.tabId, {
-            active: true,
-            url: payload.uri
-        });
+        let updated = false;
+
+        if (payload.newTab) {
+            updated = await browser.tabs.create({
+                active: true,
+                url: payload.uri
+            });
+        }
+        else {
+            updated = await browser.tabs.update(payload.tabId, {
+                active: true,
+                url: payload.uri
+            });
+        }
 
         if (updated) {
             port.postMessage({event: contracts.OpenURLCompleted}).catch();

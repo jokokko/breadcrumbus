@@ -4,6 +4,7 @@
     let app = angular.module("crumbapp", []);
 
     app.directive("ngClickonenter", [ClickOnEnter]);
+    app.directive("ngOnmiddletclick", [OnMiddleClick]);
     app.factory("port", [PortFactory]);
     app.service("navigateService", [NavigateService]);
     app.service("settingsService", [SettingsService]);
@@ -18,6 +19,22 @@
                     element.triggerHandler('click');
                 }
             });
+        };
+    }
+
+    function OnMiddleClick() {
+
+        return {
+            scope: {
+                middleAction: "&middleAction"
+            },
+            link: (scope, element) => {
+                element.bind("mousedown", function (event) {
+                    if (event.which === 2) {
+                        scope.middleAction();
+                    }
+                });
+            }
         };
     }
 
@@ -48,19 +65,10 @@
     }
 
     function SettingsService() {
-        let settings = {};
-
-        settings[contracts.OptionBreadcrumbHorizontal] = true;
-        settings[contracts.OptionBreadcrumbVertical] = false;
-
         return {
             get: async () => {
 
-                if (typeof(browser) === 'undefined') {
-                    return settings;
-                }
-
-                return browser.storage.sync.get(settings);
+                return addinSettings.get();
             }
         }
     }
@@ -143,7 +151,7 @@
         };
     }
 
-    CrumbCtrl.prototype.navigate = function (collection, part) {
+    CrumbCtrl.prototype.navigate = function (collection, part, newTab = false) {
         let ctx = this;
 
         let index = collection.uriParts.indexOf(part);
@@ -152,6 +160,6 @@
             return uri + current.part;
         }, "");
 
-        ctx.port.postMessage({command: contracts.OpenURL, payload: {tabId: collection.id, uri: target}});
+        ctx.port.postMessage({command: contracts.OpenURL, payload: {tabId: collection.id, uri: target, newTab: newTab }});
     };
 })(window);

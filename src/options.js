@@ -7,15 +7,12 @@
     app.controller("settingsctrl", ["$scope", "settingsService", SettingsCtrl]);
 
     function SettingsService() {
-        let settings = {};
-
-        settings[contracts.OptionBreadcrumbHorizontal] = true;
-        settings[contracts.OptionBreadcrumbVertical] = false;
-
         return {
             get: async () => {
-
-                return browser.storage.sync.get(settings);
+                return addinSettings.get();
+            },
+            set: async (value) => {
+                return addinSettings.set(value);
             }
         }
     }
@@ -28,14 +25,16 @@
         ctx.save = ctx.save.bind(this);
 
         ctx.$onInit = async function () {
+            let ctx = this;
             ctx.settings = await ctx.settingsService.get();
             $scope.$digest();
         };
     }
 
-    SettingsCtrl.prototype.save = function () {
+    SettingsCtrl.prototype.save = async function() {
         let ctx = this;
-        browser.storage.sync.set(ctx.settings);
+        await ctx.settingsService.set(ctx.settings);
+        await browser.runtime.sendMessage({event: contracts.SettingsUpdated, payload: ctx.settings });
     };
 
     const categories = [
@@ -47,6 +46,9 @@
             }, {
                 'key': contracts.OptionBreadcrumbHorizontal,
                 'label': browser.i18n.getMessage('option_show_crumbs_horizontal'),
+            },{
+                'key': contracts.OptionHidePageAction,
+                'label': browser.i18n.getMessage('option_hide_page_action'),
             }]
         }];
 

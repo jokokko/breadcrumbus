@@ -2,6 +2,9 @@
     "general": {
       "message" : "General"
     },
+    "option_hide_page_action": {
+        "message": "Hide page action (icon in address bar)"
+    },
     "option_show_crumbs_vertical": {
         "message": "Show breadcrumbs vertically"
     },

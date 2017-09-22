@@ -5,6 +5,10 @@ Firefox add-on for breaking active tab URLs into navigable breadcrumps. `Ctrl + 
 *Quickly created to serve my personal, daily browsings needs.*
 
 ## Screencaps
+![How it looks - page action - horizontal & vertical](https://raw.githubusercontent.com/jokokko/breadcrumbus/master/misc/screencap_pageaction_horizontalvertical.png)
+
+*Horizontal & Vertical - Page Action*
+
 ![How it looks - horizontal](https://raw.githubusercontent.com/jokokko/breadcrumbus/master/misc/screencap_horizontal.png)
 
 *Horizontal*

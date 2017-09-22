@@ -1,0 +1,10 @@
+{
+  "name": "breadcrumbus",
+  "scripts": {
+    "lint": "eslint ./src/*.js"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "eslint": "^4.7.2"
+  }
+}
