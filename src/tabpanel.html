@@ -27,6 +27,10 @@
             <ul class="list-unstyled">
                 <li ng-repeat="p in c.uriParts | shouldHideCrumb">
                 <span ng-switch="p.partType">
+                    <a href ng-switch-when="UriPartSubdomain" ng-click="ctrl.navigate(c, p)" ng-clickonenter ng-onmiddletclick middle-action="ctrl.navigate(c, p, true)">
+                    <span class="label label-warning">
+                        {{p.display}}
+                    </span></a>
                     <a href ng-switch-when="UriPartHost" ng-click="ctrl.navigate(c, p)" ng-clickonenter ng-onmiddletclick middle-action="ctrl.navigate(c, p, true)">
                     <span class="label label-primary">
                         {{p.display}}
@@ -39,7 +43,6 @@
                     <span class="label label-info">
                         {{p.display}}
                     </span></a>
-
                     <a href ng-switch-default ng-click="ctrl.navigate(c, p)" ng-clickonenter ng-onmiddletclick middle-action="ctrl.navigate(c, p, true)">
                     <span class="label label-default">
                         {{p.display}}
@@ -54,6 +57,7 @@
 </div>
 
 <script src="external/angular.min.js" type="text/javascript"></script>
+<script src="external/psl.min.js" type="text/javascript"></script>
 <script src="contracts.js" type="text/javascript"></script>
 <script src="settings.js" type="text/javascript"></script>
 <script src="app.js" type="text/javascript"></script>

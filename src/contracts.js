@@ -4,6 +4,7 @@ let contracts = {};
     ctx.OpenURL = "OpenURL";
     ctx.OpenURLCompleted = "OpenURLCompleted";
     ctx.SettingsUpdated = "SettingsUpdated";
+    ctx.UriPartSubdomain = "UriPartSubdomain";
     ctx.UriPartHost = "UriPartHost";
     ctx.UriParthPath = "UriParthPath";
     ctx.UriPartSearch = "UriPartSearch";

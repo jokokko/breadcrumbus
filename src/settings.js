@@ -5,7 +5,10 @@ let addinSettings = {};
 (async (api) => {
 
     let settings = {};
-    let storage = browser.storage.sync;
+
+    const browserDefined = typeof(browser) !== 'undefined';
+
+    let storage = browserDefined ? browser.storage.sync : {};
 
     settings[contracts.OptionBreadcrumbHorizontal] = true;
     settings[contracts.OptionBreadcrumbVertical] = false;
@@ -16,7 +19,7 @@ let addinSettings = {};
     };
 
     api.set = async (value) => {
-        if (typeof(browser) === 'undefined') {
+        if (!browserDefined) {
             return true;
         }
 
@@ -32,7 +35,7 @@ let addinSettings = {};
     };
 
     api.get = async () => {
-        if (typeof(browser) === 'undefined') {
+        if (!browserDefined) {
             return settings;
         }
 

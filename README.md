@@ -1,6 +1,8 @@
 # Breadcrumbus
 
-Firefox add-on for breaking active tab URLs into navigable breadcrumps. `Ctrl + ,` to activate.
+### [<img align="right" src="https://addons.cdn.mozilla.net/static/img/addons-buttons/AMO-button_2.png">](https://addons.mozilla.org/firefox/addon/breadcrumbus) Firefox add-on for breaking active tab URLs into navigable breadcrumps.
+
+Use page action, browser action or the hotkey `Ctrl + ,` to activate.
 
 *Quickly created to serve my personal, daily browsings needs.*
 

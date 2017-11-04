@@ -6,9 +6,10 @@
     app.directive("ngClickonenter", [ClickOnEnter]);
     app.directive("ngOnmiddletclick", [OnMiddleClick]);
     app.factory("port", [PortFactory]);
+    app.service("uriService", [UriService]);
     app.service("navigateService", [NavigateService]);
     app.service("settingsService", [SettingsService]);
-    app.controller("crumbctrl", ["$scope", "navigateService", "settingsService", "port", CrumbCtrl]);
+    app.controller("crumbctrl", ["$scope", "navigateService", "settingsService", "port", "uriService", CrumbCtrl]);
     app.filter("shouldHideCrumb", [FilterFactory]);
 
     function ClickOnEnter() {
@@ -64,6 +65,50 @@
         }
     }
 
+    function UriService() {
+        return {
+            get: (url) => {
+                let uri = new URL(url);
+                let host = new UriPart(contracts.UriPartHost, uri.origin, uri.hostname);
+                let path = uri.pathname.split(/(?=\/)/g).filter(t => t.length > 1);
+                let protocol = `${uri.protocol}//`;
+
+                let parsedUri = psl.parse(uri.hostname);
+                let subdomains = [];
+
+                if (parsedUri.subdomain)
+                {
+                    let subdomainParts = parsedUri.subdomain.split(".");
+
+                    subdomains = subdomainParts.map((t, i, a) => {
+                        return new UriPart(contracts.UriPartSubdomain, `${protocol}${[t, ...a.slice(i+1)].join(".")}.${parsedUri.domain}`, `${t}.`);
+                    });
+
+                    host = new UriPart(contracts.UriPartHost, `${protocol}${parsedUri.domain}`, parsedUri.domain)
+                }
+
+                let pathParts = path.length > 0 ? path.reduce((acc, item) => {
+                    acc.items.push(new UriPart(contracts.UriParthPath, acc.uri = acc.uri += item, item));
+                    return acc;
+                }, { items: [], uri: uri.origin }).items : [];
+
+                let search = uri.search.split(/(?=&)/g).filter(t => t.length > 1);
+
+                let searchParts = search.length > 0 ? search.reduce((acc, item) => {
+                    acc.items.push(new UriPart(contracts.UriPartSearch, acc.uri = acc.uri += item, item));
+                    return acc;
+                },  { items: [], uri: `${uri.origin}${uri.pathname}` }).items : [];
+
+                let hash = uri.hash === "" ? [] : [ new UriPart(contracts.UriPartHash, `${uri.origin}${uri.pathname}${uri.search}${uri.hash}`, uri.hash) ];
+
+                return {
+                    uriParts: [...subdomains, host, ...pathParts, ...searchParts, ...hash],
+                    uri: uri
+                }
+            }
+        }
+    }
+
     function SettingsService() {
         return {
             get: async () => {
@@ -92,7 +137,7 @@
         }
     }
 
-    function CrumbCtrl($scope, navigateService, settingsService, port) {
+    function CrumbCtrl($scope, navigateService, settingsService, port, uriService) {
 
         let ctx = this;
         let handlers = {};
@@ -103,6 +148,7 @@
         ctx.settingsService = settingsService;
         ctx.port = port;
         ctx.partCollections = [];
+        ctx.uriService = uriService;
         ctx.navigate = ctx.navigate.bind(this);
 
         handlers[contracts.OpenURLCompleted] = () => {
@@ -126,25 +172,11 @@
             ctx.settings = await ctx.settingsService.get();
 
             ctx.partCollections = currentTab.map(currentTab => {
-                let uri = new URL(currentTab.url);
-                let host = new UriPart(contracts.UriPartHost, uri.origin, uri.hostname);
-                let path = uri.pathname.split(/(?=\/)/g);
+                let ctx = this;
 
-                let pathParts = path.map((item) => {
-                    return new UriPart(contracts.UriParthPath, item);
-                });
-
-                let searchParts = uri.search.split(/(?=&)/g).map((item) => {
-                    return new UriPart(contracts.UriPartSearch, item);
-                });
-
-                let hash = new UriPart(contracts.UriPartHash, uri.hash);
-
-                return {
-                    uriParts: [host, ...pathParts, ...searchParts, hash],
-                    uri: uri,
-                    id: currentTab.id
-                }
+                let parts = ctx.uriService.get(currentTab.url);
+                parts.id = currentTab.id;
+                return parts;
             });
 
             $scope.$digest();
@@ -154,12 +186,6 @@
     CrumbCtrl.prototype.navigate = function (collection, part, newTab = false) {
         let ctx = this;
 
-        let index = collection.uriParts.indexOf(part);
-        let items = collection.uriParts.slice(0, index + 1);
-        let target = items.reduce((uri, current) => {
-            return uri + current.part;
-        }, "");
-
-        ctx.port.postMessage({command: contracts.OpenURL, payload: {tabId: collection.id, uri: target, newTab: newTab }});
+        ctx.port.postMessage({command: contracts.OpenURL, payload: {tabId: collection.id, uri: part.part, newTab: newTab }});
     };
 })(window);

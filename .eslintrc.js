@@ -11,6 +11,7 @@ module.exports = {
         "browser": false,
 		"angular": false,
         "contracts": false,
-		"addinSettings": false
+		"addinSettings": false,
+        "psl": false
     }
 };
