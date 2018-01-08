@@ -1,0 +1,2 @@
+As per request, please find included the non-minified version of
+* *psl.js* is the non-minified version of Public Suffix List: https://github.com/wrangr/psl. The corresponding minified file is *src/external/psl.min.js*.

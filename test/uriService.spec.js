@@ -70,6 +70,58 @@
                 [
                     "ftp://something.non.existent"
                 ]
+        },
+        {
+            scenario: "no trailing slash in path",
+            uri: "ftp://something.local/path/notrailingslash",
+            expected:
+                [
+                    "ftp://something.local",
+                    "ftp://something.local/path/",
+                    "ftp://something.local/path/notrailingslash"
+                ]
+        },
+        {
+            scenario: "trailing slash in path",
+            uri: "ftp://something.local/path/trailing/",
+            expected:
+                [
+                    "ftp://something.local",
+                    "ftp://something.local/path/",
+                    "ftp://something.local/path/trailing/"
+                ]
+        },
+        {
+            scenario: "trailing slash in path with querystring & hash",
+            uri: "ftp://something.local/path/trailing/?query=value#hash",
+            expected:
+                [
+                    "ftp://something.local",
+                    "ftp://something.local/path/",
+                    "ftp://something.local/path/trailing/",
+                    "ftp://something.local/path/trailing/?query=value",
+                    "ftp://something.local/path/trailing/?query=value#hash"
+                ]
+        },
+        {
+            scenario: "don't break up IPv4 IP",
+            uri: "http://127.0.0.1:8080/?query=value#hash",
+            expected:
+                [
+                    "http://127.0.0.1:8080",
+                    "http://127.0.0.1:8080/?query=value",
+                    "http://127.0.0.1:8080/?query=value#hash"
+                ]
+        },
+        {
+            scenario: "don't break up IPv6 IP",
+            uri: "http://[2001:db8:a0b:12f0::1]:8080/?query=value#hash",
+            expected:
+                [
+                    "http://[2001:db8:a0b:12f0::1]:8080",
+                    "http://[2001:db8:a0b:12f0::1]:8080/?query=value",
+                    "http://[2001:db8:a0b:12f0::1]:8080/?query=value#hash",
+                ]
         }
     ];
 

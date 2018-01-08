@@ -1,10 +1,10 @@
 <html ng-app="crumbapp">
 
-<head>
+<head ng-controller="themectrl as ctrl">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 	<link rel="stylesheet" href="external/fonts.css" type="text/css"/>
     <link rel="stylesheet" href="external/bootstrap.min.css" type="text/css"/>
-    <link rel="stylesheet" href="app.css" type="text/css"/>
+    <link rel="stylesheet" ng-href="{{ctrl.theme}}" type="text/css"/>
 </head>
 
 <body class="ng-cloak">

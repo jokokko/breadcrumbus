@@ -12,5 +12,6 @@ let contracts = {};
     ctx.OptionBreadcrumbVertical = "optionBreadcrumbVertical";
     ctx.OptionBreadcrumbHorizontal = "optionBreadcrumbHorizontal";
     ctx.OptionHidePageAction = "optionHidePageAction";
+    ctx.OptionTheme = "OptionTheme";
 
 })(contracts);

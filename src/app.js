@@ -10,6 +10,7 @@
     app.service("navigateService", [NavigateService]);
     app.service("settingsService", [SettingsService]);
     app.controller("crumbctrl", ["$scope", "navigateService", "settingsService", "port", "uriService", CrumbCtrl]);
+    app.controller("themectrl", ["$scope", ThemeCtrl]);
     app.filter("shouldHideCrumb", [FilterFactory]);
 
     function ClickOnEnter() {
@@ -66,17 +67,42 @@
     }
 
     function UriService() {
+
+        // From https://github.com/sindresorhus/ip-regex
+        const v4 = '(?:25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]\\d|\\d)(?:\\.(?:25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]\\d|\\d)){3}';
+
+        const v6seg = '[0-9a-fA-F]{1,4}';
+        const v6 = `
+(
+(?:${v6seg}:){7}(?:${v6seg}|:)|                                // 1:2:3:4:5:6:7::  1:2:3:4:5:6:7:8
+(?:${v6seg}:){6}(?:${v4}|:${v6seg}|:)|                         // 1:2:3:4:5:6::    1:2:3:4:5:6::8   1:2:3:4:5:6::8  1:2:3:4:5:6::1.2.3.4
+(?:${v6seg}:){5}(?::${v4}|(:${v6seg}){1,2}|:)|                 // 1:2:3:4:5::      1:2:3:4:5::7:8   1:2:3:4:5::8    1:2:3:4:5::7:1.2.3.4
+(?:${v6seg}:){4}(?:(:${v6seg}){0,1}:${v4}|(:${v6seg}){1,3}|:)| // 1:2:3:4::        1:2:3:4::6:7:8   1:2:3:4::8      1:2:3:4::6:7:1.2.3.4
+(?:${v6seg}:){3}(?:(:${v6seg}){0,2}:${v4}|(:${v6seg}){1,4}|:)| // 1:2:3::          1:2:3::5:6:7:8   1:2:3::8        1:2:3::5:6:7:1.2.3.4
+(?:${v6seg}:){2}(?:(:${v6seg}){0,3}:${v4}|(:${v6seg}){1,5}|:)| // 1:2::            1:2::4:5:6:7:8   1:2::8          1:2::4:5:6:7:1.2.3.4
+(?:${v6seg}:){1}(?:(:${v6seg}){0,4}:${v4}|(:${v6seg}){1,6}|:)| // 1::              1::3:4:5:6:7:8   1::8            1::3:4:5:6:7:1.2.3.4
+(?::((?::${v6seg}){0,5}:${v4}|(?::${v6seg}){1,7}|:))           // ::2:3:4:5:6:7:8  ::2:3:4:5:6:7:8  ::8             ::1.2.3.4
+)(%[0-9a-zA-Z]{1,})?                                           // %eth0            %1
+`.replace(/\s*\/\/.*$/gm, '').replace(/\n/g, '').trim();
+
+        const ipRegex = new RegExp(`(?:^${v4}$)|(?:^${v6}$)`);
+
+        function isIpAddress(host)
+        {
+            return ipRegex.test(host);
+        }
+
         return {
             get: (url) => {
                 let uri = new URL(url);
                 let host = new UriPart(contracts.UriPartHost, uri.origin, uri.hostname);
-                let path = uri.pathname.split(/(?=\/)/g).filter(t => t.length > 1);
+                let path = uri.pathname.match(/(.+?\/|.+)/g).filter(x => x.length > 1);
                 let protocol = `${uri.protocol}//`;
 
                 let parsedUri = psl.parse(uri.hostname);
                 let subdomains = [];
 
-                if (parsedUri.subdomain)
+                if (parsedUri.subdomain && !isIpAddress(uri.hostname))
                 {
                     let subdomainParts = parsedUri.subdomain.split(".");
 
@@ -176,6 +202,7 @@
 
                 let parts = ctx.uriService.get(currentTab.url);
                 parts.id = currentTab.id;
+                parts.context = currentTab.cookieStoreId;
                 return parts;
             });
 
@@ -186,6 +213,15 @@
     CrumbCtrl.prototype.navigate = function (collection, part, newTab = false) {
         let ctx = this;
 
-        ctx.port.postMessage({command: contracts.OpenURL, payload: {tabId: collection.id, uri: part.part, newTab: newTab }});
+        ctx.port.postMessage({command: contracts.OpenURL, payload: {tabId: collection.id, container: collection.context,  uri: part.part, newTab: newTab }});
     };
+
+    function ThemeCtrl($scope) {
+
+        let ctx = this;
+
+        ctx.scope = $scope;
+        ctx.theme = "app.css";
+    }
+
 })(window);

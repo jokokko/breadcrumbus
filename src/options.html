@@ -14,12 +14,29 @@
 
         <div ng-repeat="c in ctrl.categories">
 
-            <div>{{c.label}}</div>
+            <div class="panel panel-default">
+                <div class="panel-heading">{{c.label}}</div>
+                <div class="panel-body">
 
-            <div ng-repeat="item in c.options">
-                <input id="{{item.key}}" type="checkbox" ng-model="ctrl.settings[item.key]" ng-change="ctrl.save()"> <label for="{{item.key}}">{{item.label}}</label>
+                    <div ng-repeat="item in c.options">
+                        <input id="{{item.key}}" type="checkbox" ng-model="ctrl.settings[item.key]"
+                               ng-change="ctrl.save()"> <label for="{{item.key}}">{{item.label}}</label>
+                    </div>
+
+                    <div ng-repeat="enum in c.enums">
+                        <label for="{{enum.key}}">{{enum.label}}</label>
+                        <select ng-model="ctrl.settings[enum.key]" id="{{enum.key}}" ng-change="ctrl.save()">
+                            <option ng-repeat="e in enum.values" value="{{e.value}}">{{e.label}}</option>
+                        </select>
+                    </div>
+                </div>
             </div>
+        </div>
 
+        <div class="well well-sm">
+            Need to file a bug? Want to request a feature? Head to <a target=""
+                                                                      href="https://github.com/jokokko/breadcrumbus/issues">BreadCrumbus
+            Issues</a>.
         </div>
 
     </div>

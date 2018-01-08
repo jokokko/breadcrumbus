@@ -13,32 +13,29 @@ let addinSettings = {};
     settings[contracts.OptionBreadcrumbHorizontal] = true;
     settings[contracts.OptionBreadcrumbVertical] = false;
     settings[contracts.OptionHidePageAction] = false;
+    settings[contracts.OptionTheme] = "original";
 
     let noSyncStorage = (e) => {
         return e.message && e.message.indexOf("webextensions.storage.sync.enabled") > -1;
     };
 
-    api.set = async (value) => {
-        if (!browserDefined) {
-            return true;
-        }
-
+    api.set = !browserDefined ? () => { return true; } : async (value) => {
         try {
-            await storage.set(value);
+            let result = await storage.set(value);
+            settings = value;
+            return result;
         } catch (e) {
             if (noSyncStorage(e))
             {
                 storage = browser.storage.local;
-                return api.set(value);
+                let result = api.set(value);
+                settings = value;
+                return result;
             }
         }
     };
 
-    api.get = async () => {
-        if (!browserDefined) {
-            return settings;
-        }
-
+    api.get = !browserDefined ? () => { return settings; } : async () => {
         try {
             return await storage.get(settings);
         } catch (e) {

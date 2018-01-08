@@ -49,7 +49,17 @@
             },{
                 'key': contracts.OptionHidePageAction,
                 'label': browser.i18n.getMessage('option_hide_page_action'),
+            }],
+            'enums': [{
+                'label': browser.i18n.getMessage('option_theme'),
+                'key': contracts.OptionTheme,
+                'values': [{
+                    'label': "Original",
+                    'value': "original"
+                }, {
+                    'label': "Chain Link",
+                    'value': "chainlink"
+                }]
             }]
         }];
-
 })(window);

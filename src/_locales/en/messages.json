@@ -10,5 +10,8 @@
     },
     "option_show_crumbs_horizontal": {
         "message": "Show breadcrumbs horizontally"
+    },
+    "option_theme": {
+        "message": "Theme"
     }
 }

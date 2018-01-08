@@ -14,7 +14,8 @@ let root = {};
         if (payload.newTab) {
             updated = await browser.tabs.create({
                 active: true,
-                url: payload.uri
+                url: payload.uri,
+                cookieStoreId: payload.container
             });
         }
         else {
@@ -25,7 +26,7 @@ let root = {};
         }
 
         if (updated) {
-            port.postMessage({event: contracts.OpenURLCompleted}).catch();
+            port.postMessage({event: contracts.OpenURLCompleted});
         }
     };
 
