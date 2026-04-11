@@ -1,52 +1,40 @@
 'use strict';
 
-let addinSettings = {};
+const addinSettings = (() => {
+  const defaults = {
+    [contracts.OptionBreadcrumbHorizontal]: true,
+    [contracts.OptionBreadcrumbVertical]:   false,
+    [contracts.OptionHidePageAction]:       false,
+    [contracts.OptionTheme]:                'original',
+  };
 
-(async (api) => {
+  let storage = browser.storage.sync;
 
-    let settings = {};
+  const noSyncStorage = (e) =>
+    e.message && e.message.includes('webextensions.storage.sync.enabled');
 
-    const browserDefined = typeof(browser) !== 'undefined';
-
-    let storage = browserDefined ? browser.storage.sync : {};
-
-    settings[contracts.OptionBreadcrumbHorizontal] = true;
-    settings[contracts.OptionBreadcrumbVertical] = false;
-    settings[contracts.OptionHidePageAction] = false;
-    settings[contracts.OptionTheme] = "original";
-
-    let noSyncStorage = (e) => {
-        return e.message && e.message.indexOf("webextensions.storage.sync.enabled") > -1;
-    };
-
-    api.set = !browserDefined ? () => { return true; } : async (value) => {
-        try {
-            let result = await storage.set(value);
-            settings = value;
-            return result;
-        } catch (e) {
-            if (noSyncStorage(e))
-            {
-                storage = browser.storage.local;
-                let result = api.set(value);
-                settings = value;
-                return result;
-            }
+  return {
+    get: async () => {
+      try {
+        return await storage.get(defaults);
+      } catch (e) {
+        if (noSyncStorage(e)) {
+          storage = browser.storage.local;
+          return addinSettings.get();
         }
-    };
-
-    api.get = !browserDefined ? () => { return settings; } : async () => {
-        try {
-            return await storage.get(settings);
-        } catch (e) {
-            if (noSyncStorage(e))
-            {
-                storage = browser.storage.local;
-                return api.get();
-            }
+        throw e;
+      }
+    },
+    set: async (value) => {
+      try {
+        return await storage.set(value);
+      } catch (e) {
+        if (noSyncStorage(e)) {
+          storage = browser.storage.local;
+          return addinSettings.set(value);
         }
-    };
-
-    return api;
-
-})(addinSettings);
+        throw e;
+      }
+    },
+  };
+})();

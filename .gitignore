@@ -1,5 +1,19 @@
-.idea/
-
+# Dependencies
 node_modules/
 
-package-lock.json
+# Build output
+dist/
+
+# IDE
+.idea/
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Tooling
+.claude/
+
+# Logs
+*.log

@@ -14,12 +14,11 @@
     "browser_style": false
   },
   "background": {
-    "scripts": ["background.js"]
+    "service_worker": "background.js"
   },
   "permissions": [
     "tabs",
-    "storage",
-    "cookies"
+    "storage"
   ],
   "action": {
     "default_icon": {
@@ -29,24 +28,11 @@
     "default_title": "Breadcrumbus",
     "default_popup": "tabpanel.html"
   },
-  "page_action": {
-    "default_icon": {
-      "32": "resources/themes/original/icon-32-bw.png"
-    },
-    "default_title": "Breadcrumbus",
-    "default_popup": "tabpanel.html"
-  },
   "commands": {
     "_execute_action": {
       "suggested_key": {
         "default": "Ctrl+Comma"
       }
-    }
-  },
-  "version": "2.0.0",
-  "browser_specific_settings": {
-    "gecko": {
-      "id": "@breadcrumbus"
     }
   }
 }

@@ -1,44 +1,119 @@
 'use strict';
 
-let root = {};
+const browser = globalThis.browser ?? globalThis.chrome;
 
-(function () {
-    let handlers = {};
+// ── Contracts ──────────────────────────────────────────────────────────────────
+const contracts = {
+  Port: 'PortBreadcrumbus',
+  OpenURL: 'OpenURL',
+  OpenURLCompleted: 'OpenURLCompleted',
+  SettingsUpdated: 'SettingsUpdated',
+  UriPartSubdomain: 'UriPartSubdomain',
+  UriPartHost: 'UriPartHost',
+  UriParthPath: 'UriParthPath',
+  UriPartSearch: 'UriPartSearch',
+  UriPartHash: 'UriPartHash',
+  OptionBreadcrumbVertical: 'optionBreadcrumbVertical',
+  OptionBreadcrumbHorizontal: 'optionBreadcrumbHorizontal',
+  OptionHidePageAction: 'optionHidePageAction',
+  OptionTheme: 'OptionTheme',
+};
 
-    handlers[contracts.OpenURL] = async function (request, port) {
+// ── Settings ───────────────────────────────────────────────────────────────────
+const defaultSettings = {
+  [contracts.OptionBreadcrumbHorizontal]: true,
+  [contracts.OptionBreadcrumbVertical]: false,
+  [contracts.OptionHidePageAction]: false,
+  [contracts.OptionTheme]: 'original',
+};
 
-        let payload = request.payload;
+let storage = browser.storage.sync;
 
-        let updated = false;
+const noSyncStorage = (e) =>
+  e.message && e.message.includes('webextensions.storage.sync.enabled');
 
-        if (payload.newTab) {
-            updated = await browser.tabs.create({
-                active: true,
-                url: payload.uri,
-                cookieStoreId: payload.container
-            });
-        }
-        else {
-            updated = await browser.tabs.update(payload.tabId, {
-                active: true,
-                url: payload.uri
-            });
-        }
+const addinSettings = {
+  get: async () => {
+    try {
+      return await storage.get(defaultSettings);
+    } catch (e) {
+      if (noSyncStorage(e)) {
+        storage = browser.storage.local;
+        return addinSettings.get();
+      }
+      throw e;
+    }
+  },
+  set: async (value) => {
+    try {
+      return await storage.set(value);
+    } catch (e) {
+      if (noSyncStorage(e)) {
+        storage = browser.storage.local;
+        return addinSettings.set(value);
+      }
+      throw e;
+    }
+  },
+};
 
-        if (updated) {
-            port.postMessage({event: contracts.OpenURLCompleted});
-        }
-    };
+// ── URL navigation handler ─────────────────────────────────────────────────────
+browser.runtime.onConnect.addListener((port) => {
+  if (port.name !== contracts.Port) return;
 
-    function connected(p) {
-        if (p.name === contracts.Port)
-            p.onMessage.addListener(function (m) {
-                let handler = handlers[m.command];
-                if (handler) {
-                    handler(m, p);
-                }
-            });
+  port.onMessage.addListener(async (m) => {
+    if (m.command !== contracts.OpenURL) return;
+
+    const { tabId, uri, container, newTab } = m.payload;
+    let updated;
+
+    if (newTab) {
+      const params = { active: true, url: uri };
+      if (container) params.cookieStoreId = container;
+      updated = await browser.tabs.create(params);
+    } else {
+      updated = await browser.tabs.update(tabId, { active: true, url: uri });
     }
 
-    browser.runtime.onConnect.addListener(connected);
-})(root);
+    if (updated) {
+      port.postMessage({ event: contracts.OpenURLCompleted });
+    }
+  });
+});
+
+// ── Page / browser action visibility ──────────────────────────────────────────
+(async () => {
+  let settings = await addinSettings.get();
+
+  const shouldDisable = (tab) => /^about:/.test(tab.url);
+
+  browser.tabs.onUpdated.addListener(async (tabId, _, tab) => {
+    try {
+      if (shouldDisable(tab)) {
+        await browser.action.disable(tabId);
+        return;
+      }
+
+      const theme = settings[contracts.OptionTheme];
+      await browser.action.setIcon({ path: { 32: `resources/themes/${theme}/icon-32.png` } });
+      await browser.action.enable(tabId);
+
+      if (browser.pageAction) {
+        if (!settings[contracts.OptionHidePageAction]) {
+          await browser.pageAction.setIcon({ tabId, path: { 32: `resources/themes/${theme}/icon-32-bw.png` } });
+          await browser.pageAction.show(tabId);
+        } else {
+          await browser.pageAction.hide(tabId);
+        }
+      }
+    } catch (e) {
+      console.error('Setting page action state:', e);
+    }
+  });
+
+  browser.runtime.onMessage.addListener((m) => {
+    if (m.event === contracts.SettingsUpdated) {
+      settings = m.payload;
+    }
+  });
+})();
