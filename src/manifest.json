@@ -30,6 +30,7 @@
     "default_popup": "tabpanel.html"
   },
   "page_action": {
+    "show_matches": ["<all_urls>"],
     "default_icon": {
       "32": "resources/themes/original/icon-32-bw.png"
     },
@@ -43,7 +44,7 @@
       }
     }
   },
-  "version": "2.0.0",
+  "version": "2.0.1",
   "browser_specific_settings": {
     "gecko": {
       "id": "@breadcrumbus"

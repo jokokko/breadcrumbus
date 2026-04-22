@@ -2,7 +2,8 @@
 
 Browser extension for breaking active tab URLs into navigable breadcrumbs. Available for Firefox and Chrome.
 
-[<img src="https://addons.cdn.mozilla.net/static/img/addons-buttons/AMO-button_2.png" height="48">](https://addons.mozilla.org/firefox/addon/breadcrumbus)
+[![Firefox Add-on](https://img.shields.io/badge/Firefox-Get_the_Add--on-FF7139?logo=firefox-browser&logoColor=white&style=for-the-badge)](https://addons.mozilla.org/firefox/addon/breadcrumbus)
+[![Chrome Extension](https://img.shields.io/badge/Chrome-Get_the_Extension-4285F4?logo=googlechrome&logoColor=white&style=for-the-badge)](https://chromewebstore.google.com/detail/breadcrumbus/llpgmnnhnkcanadfgkjgemoejimkpdjm)
 
 Use the browser action or the hotkey `Ctrl + ,` to activate.
 
