@@ -16,7 +16,7 @@ a:hover,
 a:focus {
   color: inherit;
   text-decoration: none;
-  filter: brightness(1.25);
+  outline: none;
 }
 
 /* ── Breadcrumb chip ─────────────────────────────────────────────────────────── */
@@ -32,12 +32,17 @@ a:focus {
   font-weight: 500;
   padding: 3px 8px;
   cursor: pointer;
-  transition: filter 0.15s;
+  transition: filter 0.15s, box-shadow 0.15s;
   background-color: #1a2e48;
   color: #8aabcc;
 }
 .crumb:hover {
   filter: brightness(1.2);
+}
+a:focus .crumb,
+.crumb:has(a:focus) {
+  filter: brightness(1.2);
+  box-shadow: 0 0 0 2px #3e7ed5;
 }
 
 /* Type colours (vertical mode) */

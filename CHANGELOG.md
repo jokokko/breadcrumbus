@@ -1,5 +1,10 @@
 # Changelog
 
+## [2.1.0] - 2026-04-23
+
+### Added
+- Keyboard navigation support for breadcrumbs
+
 ## [2.0.1] - 2026-04-22
 
 ### Fixed

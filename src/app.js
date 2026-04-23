@@ -75,6 +75,12 @@
         navigate(collection, part, true);
       }
     });
+    el.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && e.ctrlKey) {
+        e.preventDefault();
+        navigate(collection, part, true);
+      }
+    });
   }
 
   function makeHorizontalItem(collection, part, navigate) {
@@ -164,5 +170,34 @@
   if (settings[contracts.OptionBreadcrumbVertical]) {
     renderVertical(container, collections, navigate);
   }
+
+  // ── Keyboard Navigation ──────────────────────────────────────────────────────
+  const focusableCrumbs = Array.from(container.querySelectorAll('a'));
+  if (focusableCrumbs.length > 0) {
+    focusableCrumbs[0].focus();
+  }
+
+  window.addEventListener('keydown', (e) => {
+    const current = document.activeElement;
+    const index = focusableCrumbs.indexOf(current);
+
+    if (index === -1) return;
+
+    let nextIndex = -1;
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+      nextIndex = (index + 1) % focusableCrumbs.length;
+    } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+      nextIndex = (index - 1 + focusableCrumbs.length) % focusableCrumbs.length;
+    } else if (e.key === 'Home') {
+      nextIndex = 0;
+    } else if (e.key === 'End') {
+      nextIndex = focusableCrumbs.length - 1;
+    }
+
+    if (nextIndex !== -1) {
+      e.preventDefault();
+      focusableCrumbs[nextIndex].focus();
+    }
+  });
 
 })();
