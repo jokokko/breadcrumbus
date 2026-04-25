@@ -1,5 +1,10 @@
 # Changelog
 
+## [2.1.1] - 2026-04-25
+
+### Fixed
+- Keep the selected address bar icon theme applied in Firefox when tabs are restored, activated, or extension settings change
+
 ## [2.1.0] - 2026-04-23
 
 ### Added
